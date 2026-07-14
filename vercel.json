@@ -1,37 +1,22 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "api/**/*.js",
-            "use": "@vercel/node"
-        },
-        {
-            "src": "**/*",
-            "use": "@vercel/static"
+            "source": "/api/(.*)",
+            "destination": "/api/$1"
         }
     ],
-    "routes": [
+    "headers": [
         {
-            "src": "/sitemap.xml",
-            "dest": "/sitemap.xml",
-            "headers": {
-                "Content-Type": "application/xml"
-            }
+            "source": "/sitemap.xml",
+            "headers": [
+                { "key": "Content-Type", "value": "application/xml" }
+            ]
         },
         {
-            "src": "/robots.txt",
-            "dest": "/robots.txt",
-            "headers": {
-                "Content-Type": "text/plain"
-            }
-        },
-        {
-            "src": "/api/(.*)",
-            "dest": "/api/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
+            "source": "/robots.txt",
+            "headers": [
+                { "key": "Content-Type", "value": "text/plain" }
+            ]
         }
     ]
 }

@@ -4,7 +4,7 @@ const client = new MercadoPagoConfig({
     accessToken: process.env.MP_ACCESS_TOKEN
 });
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,12 +36,12 @@ module.exports = async (req, res) => {
                     email: payer?.email || ''
                 },
                 back_urls: {
-                    success: `${req.headers.origin || 'https://santh.vercel.app'}/pages/sucesso.html`,
-                    failure: `${req.headers.origin || 'https://santh.vercel.app'}/pages/erro.html`,
-                    pending: `${req.headers.origin || 'https://santh.vercel.app'}/pages/pendente.html`
+                    success: `https://s4nth.vercel.app/pages/sucesso.html`,
+                    failure: `https://s4nth.vercel.app/pages/erro.html`,
+                    pending: `https://s4nth.vercel.app/pages/pendente.html`
                 },
                 auto_return: 'approved',
-                notification_url: `${req.headers.origin || 'https://santh.vercel.app'}/api/webhook`,
+                notification_url: `https://s4nth.vercel.app/api/webhook`,
                 external_reference: `SANTH-${Date.now()}`
             }
         });
