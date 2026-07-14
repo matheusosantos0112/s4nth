@@ -353,8 +353,70 @@ function renderCartPage() {
             <div class="summary-payment">
                 <p>ou ${Math.ceil(total / 12)}x de R$ ${(total / Math.ceil(total / 12)).toFixed(2).replace('.', ',')} sem juros</p>
             </div>
+            <div class="address-section">
+                <h4>Endereço de Entrega</h4>
+                <form class="address-form" id="addressForm" onsubmit="return false;">
+                    <label>
+                        Nome completo
+                        <input type="text" id="addrName" placeholder="Seu nome" required>
+                    </label>
+                    <label>
+                        CPF
+                        <input type="text" id="addrCpf" placeholder="000.000.000-00" maxlength="14" required>
+                    </label>
+                    <div class="cep-row">
+                        <label>
+                            CEP
+                            <input type="text" id="addrCep" placeholder="00000-000" maxlength="9" required>
+                        </label>
+                        <button type="button" class="btn-cep" onclick="fetchAddressByCep()">Buscar</button>
+                    </div>
+                    <span class="cep-status" id="cepStatus"></span>
+                    <label>
+                        Rua
+                        <input type="text" id="addrStreet" placeholder="Rua, Avenida..." required>
+                    </label>
+                    <div class="form-row">
+                        <label>
+                            Número
+                            <input type="text" id="addrNumber" placeholder="Nº" required>
+                        </label>
+                        <label>
+                            Complemento
+                            <input type="text" id="addrComplement" placeholder="Apto, Bloco...">
+                        </label>
+                    </div>
+                    <label>
+                        Bairro
+                        <input type="text" id="addrNeighborhood" placeholder="Bairro" required>
+                    </label>
+                    <div class="form-row">
+                        <label>
+                            Cidade
+                            <input type="text" id="addrCity" placeholder="Cidade" required>
+                        </label>
+                        <label>
+                            Estado
+                            <select id="addrState" required>
+                                <option value="">UF</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                        </label>
+                    </div>
+                </form>
+            </div>
             <button class="btn btn-primary btn-full checkout-btn" onclick="checkout()">Finalizar Compra</button>
         `;
+        initCepMask();
+        initCpfMask();
     }
 }
 
@@ -364,6 +426,31 @@ async function checkout() {
         showToast('Seu carrinho está vazio!');
         return;
     }
+
+    const addressForm = document.getElementById('addressForm');
+    if (addressForm) {
+        const fields = ['addrName','addrCpf','addrCep','addrStreet','addrNumber','addrNeighborhood','addrCity','addrState'];
+        for (const f of fields) {
+            const el = document.getElementById(f);
+            if (el && !el.value.trim()) {
+                showToast('Preencha todos os campos de entrega.');
+                el.focus();
+                return;
+            }
+        }
+    }
+
+    const address = {
+        name: document.getElementById('addrName')?.value.trim() || '',
+        cpf: document.getElementById('addrCpf')?.value.trim() || '',
+        street: document.getElementById('addrStreet')?.value.trim() || '',
+        number: document.getElementById('addrNumber')?.value.trim() || '',
+        complement: document.getElementById('addrComplement')?.value.trim() || '',
+        neighborhood: document.getElementById('addrNeighborhood')?.value.trim() || '',
+        city: document.getElementById('addrCity')?.value.trim() || '',
+        state: document.getElementById('addrState')?.value || '',
+        zip_code: document.getElementById('addrCep')?.value.replace(/\D/g, '') || ''
+    };
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
@@ -383,9 +470,9 @@ async function checkout() {
                     quantity: item.quantity
                 })),
                 payer: {
-                    name: 'Cliente SANTH',
-                    email: 'cliente@email.com'
-                }
+                    name: address.name
+                },
+                address: address
             })
         });
 
@@ -543,6 +630,71 @@ function initProductDetail() {
 function selectColor(btn, colorName) {
     document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+}
+
+// ===========================
+// Address Helpers
+// ===========================
+function initCpfMask() {
+    const el = document.getElementById('addrCpf');
+    if (!el) return;
+    el.addEventListener('input', () => {
+        let v = el.value.replace(/\D/g, '').slice(0, 11);
+        if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+        el.value = v;
+    });
+}
+
+function initCepMask() {
+    const el = document.getElementById('addrCep');
+    if (!el) return;
+    el.addEventListener('input', () => {
+        let v = el.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+        el.value = v;
+    });
+}
+
+async function fetchAddressByCep() {
+    const cepEl = document.getElementById('addrCep');
+    const statusEl = document.getElementById('cepStatus');
+    if (!cepEl || !statusEl) return;
+
+    const cep = cepEl.value.replace(/\D/g, '');
+    if (cep.length !== 8) {
+        statusEl.textContent = 'Digite um CEP válido.';
+        statusEl.className = 'cep-status error';
+        return;
+    }
+
+    statusEl.textContent = 'Buscando...';
+    statusEl.className = 'cep-status';
+
+    try {
+        const res = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`);
+        if (!res.ok) throw new Error('CEP não encontrado');
+        const data = await res.json();
+
+        const street = document.getElementById('addrStreet');
+        const neighborhood = document.getElementById('addrNeighborhood');
+        const city = document.getElementById('addrCity');
+        const state = document.getElementById('addrState');
+
+        if (street) street.value = data.street || data.logradouro || '';
+        if (neighborhood) neighborhood.value = data.neighborhood || data.bairro || '';
+        if (city) city.value = data.city || data.localidade || '';
+        if (state) state.value = data.state || data.uf || '';
+
+        if (street) street.focus();
+
+        statusEl.textContent = 'Endereço preenchido com sucesso.';
+        statusEl.className = 'cep-status success';
+    } catch (err) {
+        statusEl.textContent = 'CEP não encontrado. Preencha manualmente.';
+        statusEl.className = 'cep-status error';
+    }
 }
 
 // ===========================
