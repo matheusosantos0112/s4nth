@@ -562,6 +562,15 @@ function initProductDetail() {
                 <div class="gallery-main">
                     <img src="../${product.images[0]}" alt="${product.name}" id="mainImage">
                 </div>
+                ${product.images.length > 1 ? `
+                <div class="gallery-thumbs">
+                    ${product.images.map((img, i) => `
+                        <div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="changeMainImage('${img}', this)">
+                            <img src="../${img}" alt="${product.name} ${i + 1}">
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
             </div>
             <div class="product-detail-info">
                 <span class="detail-category">${product.category}</span>
@@ -630,6 +639,13 @@ function initProductDetail() {
 function selectColor(btn, colorName) {
     document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+}
+
+function changeMainImage(src, thumb) {
+    const mainImg = document.getElementById('mainImage');
+    if (mainImg) mainImg.src = '../' + src;
+    document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
 }
 
 // ===========================

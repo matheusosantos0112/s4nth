@@ -8,8 +8,8 @@ const PRODUCTS = [
         price: 129.90,
         oldPrice: null,
         badge: "Novo",
-        colors: ["#000000"],
-        colorNames: ["Preto"],
+        colors: ["#000000", "#ffffff"],
+        colorNames: ["Preto", "Branco"],
         images: ["img/produto-7.jpeg", "img/essential2.webp"],
         description: "O SANTH Essential é perfeito para quem busca estilo e conforto no dia a dia. Design moderno com proteção UV400, lente de alta qualidade e armação leve. Ideal para uso casual, trabalho ou passeios.",
         specs: [
