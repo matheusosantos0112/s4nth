@@ -1,6 +1,32 @@
 // Products Database - SANTH
 const PRODUCTS = [
     {
+        id: 8,
+        name: "Black Ops",
+        subtitle: "Performance extrema em qualquer terreno",
+        category: "corrida",
+        price: 139.90,
+        oldPrice: null,
+        badge: "Novo",
+        colors: ["#000000"],
+        colorNames: ["Preto"],
+        images: ["img/black-ops-glass.webp", "img/black-ops-2.webp"],
+        description: "Óculos esportivo para corrida e ciclismo com lente UV400 fotocromática. Lente antiembaçante, material resistente a impacto, encaixe em silicone e opção fotocromática. Leve, seguro e compatível com capacetes.",
+        specs: [
+            "Lente UV400 Fotocromática",
+            "Lente Antiembaçante",
+            "Material Resistente a Impacto",
+            "Encaixe em Silicone",
+            "Leve e Seguro",
+            "Compatível com Capacetes"
+        ],
+        payment: {
+            pix: 125.91,
+            card: 139.90,
+            installments: "4x de R$ 34,98"
+        }
+    },
+    {
         id: 7,
         name: "SANTH Essential",
         subtitle: "Estilo e conforto no dia a dia",
