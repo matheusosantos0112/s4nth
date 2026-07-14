@@ -1,6 +1,7 @@
 // SANTH - Main JavaScript (Supabase integrated)
 
 document.addEventListener('DOMContentLoaded', () => {
+    detectReferral();
     initHeader();
     initSearch();
     initMobileMenu();
@@ -293,7 +294,8 @@ function getCartTotal() {
 // ===========================
 let appliedCoupon = null;
 const COUPONS = {
-    'PRIMEIRACOMPRA': { discount: 0.10, label: '10% OFF' }
+    'PRIMEIRACOMPRA': { discount: 0.10, label: '10% OFF' },
+    'AMIGO15': { discount: 0.15, label: '15% OFF (Indicação)' }
 };
 
 function applyCoupon() {
@@ -318,6 +320,13 @@ function renderCartPage() {
     if (!container) return;
     
     const cart = getCart();
+    
+    if (!appliedCoupon) {
+        const referralCoupon = localStorage.getItem('santh_referral_coupon');
+        if (referralCoupon && COUPONS[referralCoupon]) {
+            appliedCoupon = referralCoupon;
+        }
+    }
     
     if (cart.length === 0) {
         container.innerHTML = `
@@ -617,11 +626,85 @@ function initCTAForm() {
     const form = document.getElementById('ctaForm');
     if (!form) return;
     
-    form.addEventListener('submit', (e) => {
+    const savedCode = localStorage.getItem('santh_referral_code');
+    if (savedCode) {
+        showCTASuccess(savedCode);
+        return;
+    }
+    
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        showToast('Cupom de 15% enviado para seu e-mail!');
-        form.reset();
+        
+        const email = document.getElementById('ctaEmail')?.value?.trim();
+        if (!email) return;
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Gerando...';
+        submitBtn.disabled = true;
+        
+        try {
+            const res = await fetch('/api/coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                localStorage.setItem('santh_referral_code', data.code);
+                showCTASuccess(data.code);
+                showToast('Cupom enviado para seu email!');
+            } else {
+                showToast(data.error || 'Erro ao gerar cupom.');
+            }
+        } catch (err) {
+            showToast('Erro ao gerar cupom. Tente novamente.');
+        }
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     });
+}
+
+function showCTASuccess(code) {
+    const defaultSection = document.getElementById('ctaDefault');
+    const successSection = document.getElementById('ctaSuccess');
+    if (!defaultSection || !successSection) return;
+    
+    defaultSection.style.display = 'none';
+    successSection.style.display = 'block';
+    
+    document.getElementById('ctaCouponCode').textContent = code;
+    
+    const shareUrl = `${window.location.origin}?ref=${code}`;
+    document.getElementById('ctaShareLink').value = shareUrl;
+    
+    const msg = encodeURIComponent(`Ganhei 15% de desconto nos óculos SANTH! Use meu link pra ganhar o mesmo desconto: ${shareUrl}`);
+    document.getElementById('ctaWhatsapp').href = `https://wa.me/?text=${msg}`;
+}
+
+function copyShareLink() {
+    const input = document.getElementById('ctaShareLink');
+    if (!input) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Link copiado!');
+    }).catch(() => {
+        input.select();
+        document.execCommand('copy');
+        showToast('Link copiado!');
+    });
+}
+
+function detectReferral() {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref && !localStorage.getItem('santh_referral_code')) {
+        localStorage.setItem('santh_referral_code', ref);
+        localStorage.setItem('santh_referral_coupon', 'AMIGO15');
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+    }
 }
 
 // ===========================
