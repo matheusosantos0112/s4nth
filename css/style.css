@@ -355,7 +355,7 @@ ul { list-style: none; }
     margin-bottom: 40px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
 }
 
 .hero-logo img {
@@ -366,8 +366,8 @@ ul { list-style: none; }
 }
 
 .hero-nome {
-    height: 60px !important;
-    opacity: 0.85;
+    height: 90px !important;
+    opacity: 0.9;
 }
 
 .hero-badge {
@@ -1255,8 +1255,8 @@ ul { list-style: none; }
 }
 
 .footer-nome {
-    height: 28px !important;
-    opacity: 0.7;
+    height: 36px !important;
+    opacity: 0.8;
 }
 
 .payment-methods {
