@@ -360,20 +360,14 @@ ul { list-style: none; }
 .hero-logo {
     margin-bottom: 40px;
     display: flex;
-    align-items: center;
-    gap: 24px;
+    justify-content: center;
 }
 
 .hero-logo img {
-    height: 160px;
+    height: 220px;
     width: auto;
     opacity: 0.9;
     filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
-}
-
-.hero-nome {
-    height: 180px !important;
-    opacity: 0.9;
 }
 
 .hero-badge {
