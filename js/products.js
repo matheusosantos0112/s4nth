@@ -30,7 +30,7 @@ const PRODUCTS = [
         id: 7,
         name: "SANTH Essential",
         subtitle: "Estilo e conforto no dia a dia",
-        category: "lifestyle",
+        category: "corrida",
         price: 129.90,
         oldPrice: null,
         badge: "Novo",
