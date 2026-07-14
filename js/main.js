@@ -628,7 +628,7 @@ function initCTAForm() {
     
     const savedCode = localStorage.getItem('santh_referral_code');
     if (savedCode) {
-        showCTASuccess(savedCode);
+        showCTASuccess(savedCode, true);
         return;
     }
     
@@ -653,8 +653,8 @@ function initCTAForm() {
             
             if (data.success) {
                 localStorage.setItem('santh_referral_code', data.code);
-                showCTASuccess(data.code);
-                showToast('Cupom enviado para seu email!');
+                localStorage.setItem('santh_referral_email', email);
+                showCTASuccess(data.code, false);
             } else {
                 showToast(data.error || 'Erro ao gerar cupom.');
             }
@@ -667,7 +667,7 @@ function initCTAForm() {
     });
 }
 
-function showCTASuccess(code) {
+function showCTASuccess(code, couponSent) {
     const defaultSection = document.getElementById('ctaDefault');
     const successSection = document.getElementById('ctaSuccess');
     if (!defaultSection || !successSection) return;
@@ -675,23 +675,59 @@ function showCTASuccess(code) {
     defaultSection.style.display = 'none';
     successSection.style.display = 'block';
     
-    document.getElementById('ctaCouponCode').textContent = code;
-    
     const shareUrl = `${window.location.origin}?ref=${code}`;
-    document.getElementById('ctaShareLink').value = shareUrl;
-    
     const msg = encodeURIComponent(`Ganhei 15% de desconto nos óculos SANTH! Use meu link pra ganhar o mesmo desconto: ${shareUrl}`);
-    document.getElementById('ctaWhatsapp').href = `https://wa.me/?text=${msg}`;
+    const whatsappUrl = `https://wa.me/?text=${msg}`;
+    
+    if (couponSent) {
+        document.getElementById('ctaCouponCode').textContent = code;
+        document.getElementById('ctaSharePending').style.display = 'none';
+        document.getElementById('ctaShareDone').style.display = 'block';
+        document.getElementById('ctaShareLink2').value = shareUrl;
+        document.getElementById('ctaWhatsapp2').href = whatsappUrl;
+    } else {
+        document.getElementById('ctaSharePending').style.display = 'block';
+        document.getElementById('ctaShareDone').style.display = 'none';
+        document.getElementById('ctaShareLink').value = shareUrl;
+        document.getElementById('ctaWhatsapp').href = whatsappUrl;
+    }
+}
+
+function onShareClick() {
+    const code = localStorage.getItem('santh_referral_code');
+    const email = localStorage.getItem('santh_referral_email');
+    if (!code) return;
+    
+    const alreadySent = localStorage.getItem('santh_coupon_sent');
+    if (alreadySent) return;
+    
+    localStorage.setItem('santh_coupon_sent', 'true');
+    
+    document.getElementById('ctaCouponCode').textContent = code;
+    document.getElementById('ctaSharePending').style.display = 'none';
+    document.getElementById('ctaShareDone').style.display = 'block';
+    
+    if (email) {
+        fetch('/api/coupon/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+        }).catch(() => {});
+    }
+    
+    showToast('Cupom liberado! Enviamos para seu email.');
 }
 
 function copyShareLink() {
     const input = document.getElementById('ctaShareLink');
     if (!input) return;
     navigator.clipboard.writeText(input.value).then(() => {
+        onShareClick();
         showToast('Link copiado!');
     }).catch(() => {
         input.select();
         document.execCommand('copy');
+        onShareClick();
         showToast('Link copiado!');
     });
 }
