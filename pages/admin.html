@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | SANTH</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header-inner">
+            <a href="../index.html" class="logo"><span class="logo-text">SANTH</span></a>
+            <nav class="nav" id="nav">
+                <a href="../index.html" class="nav-link">Voltar à Loja</a>
+            </nav>
+            <div class="header-actions">
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-page" id="adminPage">
+        <div class="container">
+            <div class="admin-header">
+                <h1 class="admin-title">Painel Administrativo</h1>
+            </div>
+            
+            <div class="admin-grid">
+                <div class="admin-form-container">
+                    <h3>Adicionar Novo Produto</h3>
+                    <form id="addProductForm">
+                        <div class="upload-zone" id="uploadZone">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <p>Arraste as fotos aqui ou <strong>clique para selecionar</strong></p>
+                            <input type="file" id="productImages" multiple accept="image/*" style="display:none">
+                        </div>
+                        
+                        <div class="upload-preview" id="uploadPreview"></div>
+                        
+                        <div class="form-group">
+                            <label for="productName">Nome do Produto *</label>
+                            <input type="text" id="productName" name="productName" placeholder="Ex: SANTH Sprint" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productSubtitle">Subtítulo</label>
+                            <input type="text" id="productSubtitle" name="productSubtitle" placeholder="Ex: Performance máxima na corrida">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productCategory">Categoria *</label>
+                            <select id="productCategory" name="productCategory" required>
+                                <option value="corrida">Corrida</option>
+                                <option value="ciclismo">Ciclismo</option>
+                                <option value="trail">Trail</option>
+                                <option value="lifestyle">Lifestyle</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productPrice">Preço (R$) *</label>
+                            <input type="number" id="productPrice" name="productPrice" step="0.01" placeholder="289.90" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productOldPrice">Preço Antigo (R$)</label>
+                            <input type="number" id="productOldPrice" name="productOldPrice" step="0.01" placeholder="Opcional">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productBadge">Badge</label>
+                            <input type="text" id="productBadge" name="productBadge" placeholder="Ex: Novo, Mais Vendido, -18%">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productColors">Cores (hex, separadas por vírgula) *</label>
+                            <input type="text" id="productColors" name="productColors" placeholder="#1a1a1a, #e63946, #457b9d" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productColorNames">Nomes das Cores *</label>
+                            <input type="text" id="productColorNames" name="productColorNames" placeholder="Preto, Vermelho, Azul" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productDescription">Descrição *</label>
+                            <textarea id="productDescription" name="productDescription" rows="4" placeholder="Descreva o produto..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productSpecs">Especificações (separadas por vírgula) *</label>
+                            <textarea id="productSpecs" name="productSpecs" rows="3" placeholder="Lente Anti-embaçante, Proteção UV400, Armação TR90" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-full">Adicionar Produto</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:24px;">Produtos Cadastrados</h3>
+                    <div class="admin-products-list" id="adminProductsList">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+
+    <script src="../js/products.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

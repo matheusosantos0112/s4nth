@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pages/admin.html
+Disallow: /pages/sucesso.html
+Disallow: /api/
+
+Sitemap: https://s4nth.vercel.app/sitemap.xml

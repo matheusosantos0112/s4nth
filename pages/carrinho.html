@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho | SANTH</title>
+    <meta name="description" content="Seu carrinho de compras SANTH - Óculos esportivos para corrida e ciclismo.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header-inner">
+            <a href="../index.html" class="logo"><span class="logo-text">SANTH</span></a>
+            <nav class="nav" id="nav">
+                <a href="../index.html#produtos" class="nav-link">Produtos</a>
+                <a href="../index.html#sobre" class="nav-link">Quem Somos</a>
+                <a href="../index.html#depoimentos" class="nav-link">Reviews</a>
+                <a href="../index.html#contato" class="nav-link">Contato</a>
+            </nav>
+            <div class="header-actions">
+                <a href="carrinho.html" class="btn-icon cart-btn" aria-label="Carrinho">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="cart-page">
+        <div class="container">
+            <a href="../index.html" class="cart-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Continuar Comprando
+            </a>
+            
+            <h1 class="cart-title">Meu Carrinho</h1>
+            
+            <div class="cart-grid">
+                <div class="cart-items" id="cartItems">
+                </div>
+                <div class="cart-summary" id="cartSummary">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border:none;padding-top:0;">
+                <p>&copy; 2026 SANTH. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast">
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+
+    <script src="../js/products.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>
