@@ -353,6 +353,9 @@ ul { list-style: none; }
 
 .hero-logo {
     margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .hero-logo img {
@@ -360,6 +363,11 @@ ul { list-style: none; }
     width: auto;
     opacity: 0.9;
     filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
+}
+
+.hero-nome {
+    height: 60px !important;
+    opacity: 0.85;
 }
 
 .hero-badge {
@@ -1235,12 +1243,20 @@ ul { list-style: none; }
 
 .footer-logo {
     margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .footer-logo img {
     height: 56px;
     width: auto;
     opacity: 0.8;
+}
+
+.footer-nome {
+    height: 28px !important;
+    opacity: 0.7;
 }
 
 .payment-methods {
