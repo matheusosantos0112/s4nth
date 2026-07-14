@@ -366,7 +366,7 @@ ul { list-style: none; }
 }
 
 .hero-nome {
-    height: 90px !important;
+    height: 180px !important;
     opacity: 0.9;
 }
 
@@ -1255,7 +1255,7 @@ ul { list-style: none; }
 }
 
 .footer-nome {
-    height: 36px !important;
+    height: 72px !important;
     opacity: 0.8;
 }
 
