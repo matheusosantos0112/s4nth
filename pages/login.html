@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin | SANTH</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+        .login-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+        }
+        .login-card .logo {
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        .login-card .logo img {
+            height: 60px;
+        }
+        .login-card h2 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            margin-bottom: 32px;
+        }
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+        .login-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray-700);
+        }
+        .login-form input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: var(--font-main);
+            transition: var(--transition);
+            background: var(--white);
+            outline: none;
+        }
+        .login-form input:focus {
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        .login-form .btn {
+            width: 100%;
+            margin-top: 8px;
+        }
+        .login-error {
+            color: #dc2626;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="login-page">
+        <div class="login-card">
+            <a href="../index.html" class="logo"><img src="../img/logo.png" alt="SANTH"></a>
+            <h2>Painel Administrativo</h2>
+            <p class="subtitle">Faça login para gerenciar sua loja</p>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Entrar</button>
+                <p class="login-error" id="loginError"></p>
+            </form>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"><span class="toast-message" id="toastMessage"></span></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data } = await _supabase.auth.getSession();
+            if (data.session) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const form = document.getElementById('loginForm');
+            const errorEl = document.getElementById('loginError');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
+                    const { error } = await _supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    window.location.href = 'admin.html';
+                } catch (err) {
+                    errorEl.textContent = err.message.includes('Invalid login') 
+                        ? 'E-mail ou senha inválidos.' 
+                        : 'Erro ao fazer login. Tente novamente.';
+                    errorEl.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

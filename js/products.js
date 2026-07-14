@@ -1,5 +1,5 @@
-// Products Database - SANTH
-const PRODUCTS = [
+// Products Database - SANTH (Supabase + fallback)
+const PRODUCTS_FALLBACK = [
     {
         id: 8,
         name: "Black Ops",
@@ -53,15 +53,101 @@ const PRODUCTS = [
     }
 ];
 
-// Load products from localStorage if available (admin uploaded)
-function getProducts() {
-    const stored = localStorage.getItem('santh_products');
-    if (stored) {
-        return JSON.parse(stored);
+async function getProducts() {
+    try {
+        if (typeof _supabase === 'undefined') return PRODUCTS_FALLBACK;
+        const { data, error } = await _supabase
+            .from('products')
+            .select('*')
+            .eq('active', true)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (data && data.length > 0) {
+            return data.map(p => ({
+                id: p.id,
+                name: p.name,
+                subtitle: p.subtitle,
+                category: p.category,
+                price: parseFloat(p.price),
+                oldPrice: p.old_price ? parseFloat(p.old_price) : null,
+                badge: p.badge,
+                colors: typeof p.colors === 'string' ? JSON.parse(p.colors) : (p.colors || []),
+                colorNames: typeof p.color_names === 'string' ? JSON.parse(p.color_names) : (p.color_names || []),
+                images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
+                description: p.description,
+                specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || []),
+                payment: typeof p.payment === 'string' ? JSON.parse(p.payment) : (p.payment || {})
+            }));
+        }
+        return PRODUCTS_FALLBACK;
+    } catch (e) {
+        console.warn('Supabase fallback:', e);
+        return PRODUCTS_FALLBACK;
     }
-    return PRODUCTS;
 }
 
-function saveProducts(products) {
-    localStorage.setItem('santh_products', JSON.stringify(products));
+async function getAllProducts() {
+    try {
+        if (typeof _supabase === 'undefined') return PRODUCTS_FALLBACK;
+        const { data, error } = await _supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data.map(p => ({
+            id: p.id,
+            name: p.name,
+            subtitle: p.subtitle,
+            category: p.category,
+            price: parseFloat(p.price),
+            oldPrice: p.old_price ? parseFloat(p.old_price) : null,
+            badge: p.badge,
+            colors: typeof p.colors === 'string' ? JSON.parse(p.colors) : (p.colors || []),
+            colorNames: typeof p.color_names === 'string' ? JSON.parse(p.color_names) : (p.color_names || []),
+            images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
+            description: p.description,
+            specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || []),
+            payment: typeof p.payment === 'string' ? JSON.parse(p.payment) : (p.payment || {}),
+            active: p.active,
+            created_at: p.created_at
+        }));
+    } catch (e) {
+        console.warn('Supabase getAllProducts fallback:', e);
+        return PRODUCTS_FALLBACK;
+    }
+}
+
+async function addProduct(product) {
+    const { data, error } = await _supabase.from('products').insert(product).select().single();
+    if (error) throw error;
+    return data;
+}
+
+async function updateProduct(id, updates) {
+    const { data, error } = await _supabase.from('products').update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+}
+
+async function deleteProduct(id) {
+    const { error } = await _supabase.from('products').delete().eq('id', id);
+    if (error) throw error;
+}
+
+async function saveOrder(order) {
+    const { data, error } = await _supabase.from('orders').insert(order).select().single();
+    if (error) throw error;
+    return data;
+}
+
+async function getOrders() {
+    const { data, error } = await _supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+}
+
+async function updateOrderStatus(id, status) {
+    const { data, error } = await _supabase.from('orders').update({ status }).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
 }

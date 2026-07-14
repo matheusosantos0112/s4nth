@@ -1,4 +1,4 @@
-// SANTH - Main JavaScript
+// SANTH - Main JavaScript (Supabase integrated)
 
 document.addEventListener('DOMContentLoaded', () => {
     initHeader();
@@ -78,11 +78,12 @@ function initMobileMenu() {
 // ===========================
 // Products
 // ===========================
-function initProducts() {
+async function initProducts() {
     const track = document.getElementById('productsTrack');
     if (!track) return;
     
-    const products = getProducts();
+    track.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">Carregando produtos...</p>';
+    const products = await getProducts();
     renderProducts(products);
 }
 
@@ -90,12 +91,17 @@ function renderProducts(products) {
     const track = document.getElementById('productsTrack');
     if (!track) return;
     
+    if (products.length === 0) {
+        track.innerHTML = '<p style="text-align:center;padding:40px;color:#999;">Nenhum produto encontrado.</p>';
+        return;
+    }
+    
     track.innerHTML = products.map(product => `
-        <article class="product-card" data-category="${product.category}" onclick="goToProduct(${product.id})">
+        <article class="product-card" data-category="${product.category}" onclick="goToProduct('${product.id}')">
             <div class="product-image">
                 <img src="${product.images[0]}" alt="${product.name}" loading="lazy">
                 ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-                <button class="product-quick-add" onclick="event.stopPropagation(); addToCart(${product.id})" aria-label="Adicionar ao carrinho">
+                <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('${product.id}')" aria-label="Adicionar ao carrinho">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
             </div>
@@ -108,8 +114,8 @@ function renderProducts(products) {
                     ${product.oldPrice ? `<span class="price-old">R$ ${product.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
                 </div>
                 <div class="product-colors">
-                    ${product.colors.map(color => `
-                        <span class="color-dot" style="background:${color}" title="${product.colorNames[product.colors.indexOf(color)]}"></span>
+                    ${product.colors.map((color, i) => `
+                        <span class="color-dot" style="background:${color}" title="${product.colorNames[i] || ''}"></span>
                     `).join('')}
                 </div>
             </div>
@@ -128,12 +134,12 @@ function initFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     
     filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
             const filter = btn.dataset.filter;
-            const products = getProducts();
+            const products = await getProducts();
             
             if (filter === 'todos') {
                 renderProducts(products);
@@ -221,40 +227,41 @@ function saveCart(cart) {
 }
 
 function addToCart(productId, quantity = 1) {
-    const products = getProducts();
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
-    const cart = getCart();
-    const existing = cart.find(item => item.id === productId);
-    
-    if (existing) {
-        existing.quantity += quantity;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: product.images[0],
-            color: product.colorNames[0],
-            quantity: quantity
-        });
-    }
-    
-    saveCart(cart);
-    showToast(`${product.name} adicionado ao carrinho!`);
+    getProducts().then(products => {
+        const product = products.find(p => String(p.id) === String(productId));
+        if (!product) return;
+        
+        const cart = getCart();
+        const existing = cart.find(item => String(item.id) === String(productId));
+        
+        if (existing) {
+            existing.quantity += quantity;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0],
+                color: product.colorNames[0],
+                quantity: quantity
+            });
+        }
+        
+        saveCart(cart);
+        showToast(`${product.name} adicionado ao carrinho!`);
+    });
 }
 
 function removeFromCart(productId) {
     let cart = getCart();
-    cart = cart.filter(item => item.id !== productId);
+    cart = cart.filter(item => String(item.id) !== String(productId));
     saveCart(cart);
     renderCartPage();
 }
 
 function updateCartQuantity(productId, newQty) {
     const cart = getCart();
-    const item = cart.find(i => i.id === productId);
+    const item = cart.find(i => String(i.id) === String(productId));
     if (item) {
         if (newQty <= 0) {
             removeFromCart(productId);
@@ -276,14 +283,30 @@ function updateCartCount() {
     }
 }
 
+function getCartTotal() {
+    const cart = getCart();
+    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+}
+
+// ===========================
+// Coupon
+// ===========================
 let appliedCoupon = null;
 const COUPONS = {
     'PRIMEIRACOMPRA': { discount: 0.10, label: '10% OFF' }
 };
 
-function getCartTotal() {
-    const cart = getCart();
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+function applyCoupon() {
+    const input = document.getElementById('promoCode');
+    if (!input) return;
+    const code = input.value.trim().toUpperCase();
+    if (COUPONS[code]) {
+        appliedCoupon = code;
+        showToast(`Cupom "${code}" aplicado com sucesso!`);
+        renderCartPage();
+    } else {
+        showToast('Cupom inválido.');
+    }
 }
 
 // ===========================
@@ -319,20 +342,19 @@ function renderCartPage() {
                 <p class="cart-item-variant">Cor: ${item.color}</p>
                 <div class="cart-item-bottom">
                     <div class="quantity-control">
-                        <button class="qty-btn" onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})">−</button>
+                        <button class="qty-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">−</button>
                         <span class="qty-value">${item.quantity}</span>
-                        <button class="qty-btn" onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        <button class="qty-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">+</button>
                     </div>
                     <span class="cart-item-price">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
                 </div>
-                <button class="cart-item-remove" onclick="removeFromCart(${item.id})">Remover</button>
+                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">Remover</button>
             </div>
         </div>
     `).join('');
     
     if (summary) {
         const total = getCartTotal();
-        const pixDiscount = total * 0.1;
         const couponDiscount = appliedCoupon ? total * COUPONS[appliedCoupon].discount : 0;
         const finalTotal = total - couponDiscount;
         summary.innerHTML = `
@@ -466,7 +488,34 @@ async function checkout() {
         checkoutBtn.disabled = true;
     }
 
+    const total = getCartTotal();
+    const couponDiscount = appliedCoupon ? total * COUPONS[appliedCoupon].discount : 0;
+
     try {
+        const orderData = {
+            customer_name: address.name,
+            customer_cpf: address.cpf,
+            items: cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image
+            })),
+            total: total - couponDiscount,
+            coupon: appliedCoupon || null,
+            discount: couponDiscount,
+            address: address,
+            status: 'pending'
+        };
+
+        let savedOrder = null;
+        try {
+            savedOrder = await saveOrder(orderData);
+        } catch (dbErr) {
+            console.warn('Erro ao salvar pedido no Supabase:', dbErr);
+        }
+
         const response = await fetch('/api/create-preference', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -487,7 +536,7 @@ async function checkout() {
         const data = await response.json();
 
         if (data.init_point) {
-            localStorage.setItem('santh_last_order', data.external_reference || 'SANTH-' + Date.now());
+            localStorage.setItem('santh_last_order', savedOrder?.id || data.external_reference || 'SANTH-' + Date.now());
             localStorage.removeItem('santh_cart');
             window.location.href = data.init_point;
         } else {
@@ -547,15 +596,15 @@ function initCTAForm() {
 // ===========================
 // Product Detail Page
 // ===========================
-function initProductDetail() {
+async function initProductDetail() {
     const container = document.getElementById('productDetail');
     if (!container) return;
     
     const params = new URLSearchParams(window.location.search);
-    const productId = parseInt(params.get('id'));
+    const productId = params.get('id');
     
-    const products = getProducts();
-    const product = products.find(p => p.id === productId);
+    const products = await getProducts();
+    const product = products.find(p => String(p.id) === String(productId));
     
     if (!product) {
         container.innerHTML = '<p style="text-align:center;padding:100px 0;">Produto não encontrado.</p>';
@@ -608,8 +657,8 @@ function initProductDetail() {
                 </div>
                 
                 <div class="detail-actions">
-                    <button class="btn-add-cart" onclick="addToCart(${product.id})">Adicionar ao Carrinho</button>
-                    <button class="btn-buy-now" onclick="addToCart(${product.id}); window.location.href='carrinho.html'">Comprar Agora</button>
+                    <button class="btn-add-cart" onclick="addToCart('${product.id}')">Adicionar ao Carrinho</button>
+                    <button class="btn-buy-now" onclick="addToCart('${product.id}'); window.location.href='carrinho.html'">Comprar Agora</button>
                 </div>
                 
                 <div class="detail-payment">
@@ -654,19 +703,6 @@ function changeMainImage(src, thumb) {
     if (mainImg) mainImg.src = '../' + src;
     document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
     thumb.classList.add('active');
-}
-
-function applyCoupon() {
-    const input = document.getElementById('promoCode');
-    if (!input) return;
-    const code = input.value.trim().toUpperCase();
-    if (COUPONS[code]) {
-        appliedCoupon = code;
-        showToast(`Cupom "${code}" aplicado com sucesso!`);
-        renderCartPage();
-    } else {
-        showToast('Cupom inválido.');
-    }
 }
 
 // ===========================
@@ -737,8 +773,9 @@ async function fetchAddressByCep() {
 // ===========================
 // Admin Panel
 // ===========================
-function initAdmin() {
-    renderAdminProducts();
+async function initAdmin() {
+    await renderAdminProducts();
+    await renderAdminOrders();
     
     const form = document.getElementById('addProductForm');
     if (form) {
@@ -807,77 +844,183 @@ function removeUploadImage(index) {
     renderUploadPreview();
 }
 
-function handleAddProduct(e) {
+async function handleAddProduct(e) {
     e.preventDefault();
     
     const form = e.target;
-    const products = getProducts();
+    const colors = form.productColors.value.split(',').map(c => c.trim());
+    const colorNames = form.productColorNames.value.split(',').map(c => c.trim());
+    const price = parseFloat(form.productPrice.value);
     
     const newProduct = {
-        id: Date.now(),
         name: form.productName.value,
         subtitle: form.productSubtitle.value,
         category: form.productCategory.value,
-        price: parseFloat(form.productPrice.value),
-        oldPrice: form.productOldPrice.value ? parseFloat(form.productOldPrice.value) : null,
+        price: price,
+        old_price: form.productOldPrice.value ? parseFloat(form.productOldPrice.value) : null,
         badge: form.productBadge.value || null,
-        colors: form.productColors.value.split(',').map(c => c.trim()),
-        colorNames: form.productColorNames.value.split(',').map(c => c.trim()),
+        colors: colors,
+        color_names: colorNames,
         images: uploadedImages.length > 0 ? uploadedImages : ['img/produto-placeholder.svg'],
         description: form.productDescription.value,
         specs: form.productSpecs.value.split(',').map(s => s.trim()),
         payment: {
-            pix: parseFloat(form.productPrice.value) * 0.9,
-            card: parseFloat(form.productPrice.value),
-            installments: `12x de R$ ${(parseFloat(form.productPrice.value) / 12).toFixed(2).replace('.', ',')}`
-        }
+            pix: price * 0.9,
+            card: price,
+            installments: `12x de R$ ${(price / 12).toFixed(2).replace('.', ',')}`
+        },
+        active: true
     };
     
-    products.push(newProduct);
-    saveProducts(products);
-    
-    form.reset();
-    uploadedImages = [];
-    renderUploadPreview();
-    renderAdminProducts();
-    showToast('Produto adicionado com sucesso!');
+    try {
+        await addProduct(newProduct);
+        form.reset();
+        uploadedImages = [];
+        renderUploadPreview();
+        await renderAdminProducts();
+        showToast('Produto adicionado com sucesso!');
+    } catch (err) {
+        console.error('Erro ao adicionar produto:', err);
+        showToast('Erro ao adicionar produto. Tente novamente.');
+    }
 }
 
-function renderAdminProducts() {
+async function renderAdminProducts() {
     const list = document.getElementById('adminProductsList');
     if (!list) return;
     
-    const products = getProducts();
-    
-    list.innerHTML = products.map(product => `
-        <div class="admin-product-item">
-            <div class="admin-product-thumb">
-                <img src="../${product.images[0]}" alt="${product.name}">
+    try {
+        const products = await getAllProducts();
+        
+        list.innerHTML = products.map(product => `
+            <div class="admin-product-item">
+                <div class="admin-product-thumb">
+                    <img src="../${product.images[0]}" alt="${product.name}">
+                </div>
+                <div class="admin-product-info">
+                    <strong>${product.name}</strong>
+                    <span>R$ ${product.price.toFixed(2).replace('.', ',')} • ${product.category} • ${product.active ? 'Ativo' : 'Inativo'}</span>
+                </div>
+                <div class="admin-product-actions">
+                    <button class="btn-edit" onclick="toggleProductActive('${product.id}', ${!product.active})">${product.active ? 'Desativar' : 'Ativar'}</button>
+                    <button class="btn-delete" onclick="adminDeleteProduct('${product.id}')">Excluir</button>
+                </div>
             </div>
-            <div class="admin-product-info">
-                <strong>${product.name}</strong>
-                <span>R$ ${product.price.toFixed(2).replace('.', ',')} • ${product.category}</span>
-            </div>
-            <div class="admin-product-actions">
-                <button class="btn-edit" onclick="editProduct(${product.id})">Editar</button>
-                <button class="btn-delete" onclick="deleteProduct(${product.id})">Excluir</button>
-            </div>
-        </div>
-    `).join('');
+        `).join('');
+    } catch (err) {
+        list.innerHTML = '<p style="color:#999;">Erro ao carregar produtos.</p>';
+    }
 }
 
-function deleteProduct(id) {
+async function toggleProductActive(id, active) {
+    try {
+        await updateProduct(id, { active });
+        await renderAdminProducts();
+        showToast(active ? 'Produto ativado!' : 'Produto desativado!');
+    } catch (err) {
+        showToast('Erro ao atualizar produto.');
+    }
+}
+
+async function adminDeleteProduct(id) {
     if (!confirm('Tem certeza que deseja excluir este produto?')) return;
     
-    let products = getProducts();
-    products = products.filter(p => p.id !== id);
-    saveProducts(products);
-    renderAdminProducts();
-    showToast('Produto excluído.');
+    try {
+        await deleteProduct(id);
+        await renderAdminProducts();
+        showToast('Produto excluído.');
+    } catch (err) {
+        showToast('Erro ao excluir produto.');
+    }
 }
 
-function editProduct(id) {
-    window.location.href = `editar-produto.html?id=${id}`;
+async function renderAdminOrders() {
+    const container = document.getElementById('adminOrdersList');
+    if (!container) return;
+    
+    try {
+        const orders = await getOrders();
+        
+        if (orders.length === 0) {
+            container.innerHTML = '<p style="color:#999;">Nenhum pedido recebido ainda.</p>';
+            return;
+        }
+        
+        const statusLabels = {
+            pending: 'Pendente',
+            paid: 'Pago',
+            shipped: 'Enviado',
+            delivered: 'Entregue',
+            cancelled: 'Cancelado'
+        };
+        
+        const statusColors = {
+            pending: '#f59e0b',
+            paid: '#16a34a',
+            shipped: '#3b82f6',
+            delivered: '#10b981',
+            cancelled: '#ef4444'
+        };
+        
+        container.innerHTML = orders.map(order => `
+            <div class="admin-order-item" style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;">
+                    <div>
+                        <strong style="font-size:1rem;">${order.customer_name}</strong>
+                        <p style="font-size:0.85rem;color:var(--gray-500);">CPF: ${order.customer_cpf || 'Não informado'}</p>
+                    </div>
+                    <span style="padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;background:${statusColors[order.status]}20;color:${statusColors[order.status]};">${statusLabels[order.status] || order.status}</span>
+                </div>
+                <div style="font-size:0.85rem;color:var(--gray-600);margin-bottom:8px;">
+                    ${(order.items || []).map(item => `${item.name} x${item.quantity}`).join(', ')}
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong style="font-family:var(--font-display);font-size:1.1rem;">R$ ${parseFloat(order.total).toFixed(2).replace('.', ',')}</strong>
+                    <span style="font-size:0.8rem;color:var(--gray-400);">${new Date(order.created_at).toLocaleDateString('pt-BR')} ${new Date(order.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</span>
+                </div>
+                ${order.address ? `<p style="font-size:0.8rem;color:var(--gray-400);margin-top:8px;">${order.address.street}, ${order.address.number} - ${order.address.neighborhood}, ${order.address.city}/${order.address.state} - CEP: ${order.address.zip_code}</p>` : ''}
+                ${order.coupon ? `<p style="font-size:0.8rem;color:#16a34a;margin-top:4px;">Cupom: ${order.coupon} (-R$ ${parseFloat(order.discount).toFixed(2).replace('.', ',')})</p>` : ''}
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <select onchange="changeOrderStatus('${order.id}', this.value)" style="padding:6px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:0.85rem;">
+                        <option value="pending" ${order.status==='pending'?'selected':''}>Pendente</option>
+                        <option value="paid" ${order.status==='paid'?'selected':''}>Pago</option>
+                        <option value="shipped" ${order.status==='shipped'?'selected':''}>Enviado</option>
+                        <option value="delivered" ${order.status==='delivered'?'selected':''}>Entregue</option>
+                        <option value="cancelled" ${order.status==='cancelled'?'selected':''}>Cancelado</option>
+                    </select>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        container.innerHTML = '<p style="color:#999;">Erro ao carregar pedidos.</p>';
+    }
+}
+
+async function changeOrderStatus(id, status) {
+    try {
+        await updateOrderStatus(id, status);
+        showToast('Status atualizado!');
+    } catch (err) {
+        showToast('Erro ao atualizar status.');
+    }
+}
+
+// ===========================
+// Auth - Admin Login
+// ===========================
+async function adminLogin(email, password) {
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+}
+
+async function adminLogout() {
+    await _supabase.auth.signOut();
+}
+
+async function isAdminLoggedIn() {
+    const { data } = await _supabase.auth.getSession();
+    return !!data.session;
 }
 
 // ===========================
@@ -892,5 +1035,12 @@ if (document.getElementById('cartItems')) {
 }
 
 if (document.getElementById('adminPage')) {
-    initAdmin();
+    (async () => {
+        const loggedIn = await isAdminLoggedIn();
+        if (!loggedIn) {
+            window.location.href = 'login.html';
+            return;
+        }
+        initAdmin();
+    })();
 }

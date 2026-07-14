@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
+        "@supabase/supabase-js": "^2.110.5",
         "mercadopago": "^2.0.0"
     }
 }
