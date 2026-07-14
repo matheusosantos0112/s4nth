@@ -583,14 +583,18 @@ function initContactForm() {
         submitBtn.textContent = 'Enviando...';
         submitBtn.disabled = true;
 
-        const replyto = document.getElementById('email')?.value || '';
-        document.getElementById('replytoHidden').value = replyto;
-
         try {
-            const formData = new FormData(form);
-            const response = await fetch('https://api.web3forms.com/submit', {
+            const data = {
+                name: document.getElementById('name')?.value || '',
+                email: document.getElementById('email')?.value || '',
+                contactSubject: document.getElementById('contactSubject')?.value || '',
+                message: document.getElementById('message')?.value || ''
+            };
+
+            const response = await fetch('/api/contact', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
             const result = await response.json();
 
@@ -598,7 +602,7 @@ function initContactForm() {
                 showToast('Mensagem enviada com sucesso! Retornaremos em breve.');
                 form.reset();
             } else {
-                showToast('Erro ao enviar. Tente novamente.');
+                showToast(result.error || 'Erro ao enviar. Tente novamente.');
             }
         } catch (err) {
             showToast('Erro ao enviar. Tente novamente.');
