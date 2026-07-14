@@ -5,7 +5,7 @@ const PRODUCTS = [
         name: "Black Ops",
         subtitle: "Performance extrema em qualquer terreno",
         category: "corrida",
-        price: 139.90,
+        price: 109.90,
         oldPrice: null,
         badge: "Novo",
         colors: ["#000000"],
@@ -21,9 +21,9 @@ const PRODUCTS = [
             "Compatível com Capacetes"
         ],
         payment: {
-            pix: 125.91,
-            card: 139.90,
-            installments: "4x de R$ 34,98"
+            pix: 98.91,
+            card: 109.90,
+            installments: "4x de R$ 27,48"
         }
     },
     {
@@ -31,7 +31,7 @@ const PRODUCTS = [
         name: "SANTH Essential",
         subtitle: "Estilo e conforto no dia a dia",
         category: "corrida",
-        price: 129.90,
+        price: 89.90,
         oldPrice: null,
         badge: "Novo",
         colors: ["#000000", "#ffffff"],
@@ -46,9 +46,9 @@ const PRODUCTS = [
             "Acabamento Premium"
         ],
         payment: {
-            pix: 116.91,
-            card: 129.90,
-            installments: "4x de R$ 32,48"
+            pix: 80.91,
+            card: 89.90,
+            installments: "4x de R$ 22,48"
         }
     }
 ];
