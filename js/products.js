@@ -10,7 +10,7 @@ const PRODUCTS = [
         badge: "Novo",
         colors: ["#000000"],
         colorNames: ["Preto"],
-        images: ["img/produto-7.jpeg"],
+        images: ["img/produto-7.jpeg", "img/essential2.webp"],
         description: "O SANTH Essential é perfeito para quem busca estilo e conforto no dia a dia. Design moderno com proteção UV400, lente de alta qualidade e armação leve. Ideal para uso casual, trabalho ou passeios.",
         specs: [
             "Lente com Proteção UV400",
