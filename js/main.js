@@ -276,6 +276,11 @@ function updateCartCount() {
     }
 }
 
+let appliedCoupon = null;
+const COUPONS = {
+    'PRIMEIRACOMPRA': { discount: 0.10, label: '10% OFF' }
+};
+
 function getCartTotal() {
     const cart = getCart();
     return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -328,6 +333,8 @@ function renderCartPage() {
     if (summary) {
         const total = getCartTotal();
         const pixDiscount = total * 0.1;
+        const couponDiscount = appliedCoupon ? total * COUPONS[appliedCoupon].discount : 0;
+        const finalTotal = total - couponDiscount;
         summary.innerHTML = `
             <h3>Resumo do Pedido</h3>
             <div class="summary-row">
@@ -338,20 +345,21 @@ function renderCartPage() {
                 <span>Frete</span>
                 <span style="color:#16a34a;font-weight:600">Grátis</span>
             </div>
+            ${appliedCoupon ? `<div class="summary-row"><span>Cupom (${COUPONS[appliedCoupon].label})</span><span style="color:#16a34a">- R$ ${couponDiscount.toFixed(2).replace('.', ',')}</span></div>` : ''}
             <div class="summary-row total">
                 <span>Total</span>
-                <span>R$ ${total.toFixed(2).replace('.', ',')}</span>
+                <span>R$ ${finalTotal.toFixed(2).replace('.', ',')}</span>
             </div>
             <div class="promo-input">
-                <input type="text" placeholder="Cupom de desconto">
-                <button>Aplicar</button>
+                <input type="text" placeholder="Cupom de desconto" id="promoCode">
+                <button onclick="applyCoupon()">Aplicar</button>
             </div>
             <div class="summary-payment">
                 <p>PIX com 10% OFF</p>
-                <span class="installment">R$ ${(total - pixDiscount).toFixed(2).replace('.', ',')}</span>
+                <span class="installment">R$ ${(finalTotal - finalTotal * 0.1).toFixed(2).replace('.', ',')}</span>
             </div>
             <div class="summary-payment">
-                <p>ou ${Math.ceil(total / 12)}x de R$ ${(total / Math.ceil(total / 12)).toFixed(2).replace('.', ',')} sem juros</p>
+                <p>ou ${Math.ceil(finalTotal / 12)}x de R$ ${(finalTotal / Math.ceil(finalTotal / 12)).toFixed(2).replace('.', ',')} sem juros</p>
             </div>
             <div class="address-section">
                 <h4>Endereço de Entrega</h4>
@@ -646,6 +654,19 @@ function changeMainImage(src, thumb) {
     if (mainImg) mainImg.src = '../' + src;
     document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
     thumb.classList.add('active');
+}
+
+function applyCoupon() {
+    const input = document.getElementById('promoCode');
+    if (!input) return;
+    const code = input.value.trim().toUpperCase();
+    if (COUPONS[code]) {
+        appliedCoupon = code;
+        showToast(`Cupom "${code}" aplicado com sucesso!`);
+        renderCartPage();
+    } else {
+        showToast('Cupom inválido.');
+    }
 }
 
 // ===========================
