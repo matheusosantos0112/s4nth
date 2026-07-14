@@ -575,10 +575,37 @@ function initContactForm() {
     const form = document.getElementById('contactForm');
     if (!form) return;
     
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        showToast('Mensagem enviada com sucesso! Retornaremos em breve.');
-        form.reset();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+
+        const replyto = document.getElementById('email')?.value || '';
+        document.getElementById('replytoHidden').value = replyto;
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showToast('Mensagem enviada com sucesso! Retornaremos em breve.');
+                form.reset();
+            } else {
+                showToast('Erro ao enviar. Tente novamente.');
+            }
+        } catch (err) {
+            showToast('Erro ao enviar. Tente novamente.');
+        }
+
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     });
 }
 
