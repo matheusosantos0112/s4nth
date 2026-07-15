@@ -762,6 +762,7 @@ async function initProductDetail() {
     }
     
     document.title = `${product.name} | SANTH`;
+    currentProduct = product;
     
     container.innerHTML = `
         <div class="product-detail-grid">
@@ -800,7 +801,7 @@ async function initProductDetail() {
                             <button class="color-option ${i === 0 ? 'active' : ''}" 
                                 style="background:${color}" 
                                 title="${product.colorNames[i]}"
-                                onclick="selectColor(this, '${product.colorNames[i]}')">
+                                onclick="selectColor(this, '${product.colorNames[i]}', '${product.id}')">
                             </button>
                         `).join('')}
                     </div>
@@ -843,10 +844,29 @@ async function initProductDetail() {
     `;
 }
 
-function selectColor(btn, colorName) {
+function selectColor(btn, colorName, productId) {
     document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
+    if (typeof currentProduct !== 'undefined' && currentProduct.colorImages && currentProduct.colorImages[colorName]) {
+        const images = currentProduct.colorImages[colorName];
+        const mainImg = document.getElementById('mainImage');
+        if (mainImg && images[0]) mainImg.src = '../' + images[0];
+        
+        const thumbsContainer = document.querySelector('.gallery-thumbs');
+        if (thumbsContainer && images.length > 1) {
+            thumbsContainer.innerHTML = images.map((img, i) => `
+                <div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="changeMainImage('${img}', this)">
+                    <img src="../${img}" alt="${currentProduct.name} ${i + 1}">
+                </div>
+            `).join('');
+        } else if (thumbsContainer) {
+            thumbsContainer.innerHTML = '';
+        }
+    }
 }
+
+let currentProduct = null;
 
 function changeMainImage(src, thumb) {
     const mainImg = document.getElementById('mainImage');
