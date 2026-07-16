@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initContactForm();
     initCTAForm();
     updateCartCount();
+    initCustomerAuth();
 });
 
 // ===========================
@@ -28,6 +29,45 @@ function initHeader() {
             header.classList.remove('scrolled');
         }
     });
+}
+
+// ===========================
+// Customer Auth (Header state)
+// ===========================
+function initCustomerAuth() {
+    const loggedOut = document.getElementById('headerAuthLoggedOut');
+    const loggedIn = document.getElementById('headerAuthLoggedIn');
+    const userName = document.getElementById('headerUserName');
+    if (!loggedOut && !loggedIn) return;
+
+    if (typeof _supabase === 'undefined') return;
+
+    _supabase.auth.getSession().then(({ data: { session } }) => {
+        updateHeaderAuth(session);
+    });
+
+    _supabase.auth.onAuthStateChange((_event, session) => {
+        updateHeaderAuth(session);
+    });
+}
+
+function updateHeaderAuth(session) {
+    const loggedOut = document.getElementById('headerAuthLoggedOut');
+    const loggedIn = document.getElementById('headerAuthLoggedIn');
+    const userName = document.getElementById('headerUserName');
+    if (!loggedOut && !loggedIn) return;
+
+    if (session) {
+        if (loggedOut) loggedOut.style.display = 'none';
+        if (loggedIn) {
+            loggedIn.style.display = 'flex';
+            const meta = session.user.user_metadata || {};
+            if (userName) userName.textContent = meta.name || session.user.email.split('@')[0];
+        }
+    } else {
+        if (loggedOut) loggedOut.style.display = 'flex';
+        if (loggedIn) loggedIn.style.display = 'none';
+    }
 }
 
 // ===========================

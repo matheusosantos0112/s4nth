@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta | SANTH</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <style>
+        .account-page {
+            min-height: 100vh;
+            background: var(--bg);
+            padding: 40px 20px;
+        }
+        .account-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .account-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .account-header h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .account-header p {
+            color: var(--gray-500);
+        }
+        .account-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .account-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .account-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .account-info-item label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .account-info-item span {
+            font-size: 0.95rem;
+            color: var(--gray-700);
+        }
+        .account-info-item.full-width {
+            grid-column: 1 / -1;
+        }
+        .account-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-outline-dark {
+            padding: 12px 24px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: var(--font-main);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-outline-dark:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        .btn-danger {
+            padding: 12px 24px;
+            border: 1.5px solid #dc2626;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: #dc2626;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: var(--font-main);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            color: white;
+        }
+        .account-orders-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-400);
+        }
+        .account-orders-empty p {
+            margin-bottom: 16px;
+        }
+        .order-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .order-item-top strong {
+            font-size: 0.95rem;
+        }
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .order-status.pending { background: #fef3c7; color: #d97706; }
+        .order-status.paid { background: #d1fae5; color: #059669; }
+        .order-status.shipped { background: #dbeafe; color: #2563eb; }
+        .order-status.delivered { background: #d1fae5; color: #059669; }
+        .order-status.cancelled { background: #fee2e2; color: #dc2626; }
+        .order-item-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+    </style>
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container header-inner">
+            <a href="../index.html" class="logo"><img src="../img/logo.png" alt="SANTH"><img src="../img/nome-preto.png" alt="SANTH" class="header-nome"></a>
+            <nav class="nav" id="nav">
+                <a href="../index.html" class="nav-link">Voltar à Loja</a>
+            </nav>
+            <div class="header-actions">
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="account-page">
+        <div class="account-container">
+            <div class="account-header">
+                <h1>Minha Conta</h1>
+                <p>Gerencie seus dados e acompanhe seus pedidos</p>
+            </div>
+
+            <div class="account-card" id="profileCard">
+                <h3>Meus Dados</h3>
+                <div class="account-info-grid" id="profileInfo">
+                    <p style="color:var(--gray-400);grid-column:1/-1;">Carregando...</p>
+                </div>
+                <div class="account-actions">
+                    <a href="../index.html" class="btn btn-primary" style="text-decoration:none;">Continuar Comprando</a>
+                    <button class="btn-danger" onclick="customerLogout()">Sair da Conta</button>
+                </div>
+            </div>
+
+            <div class="account-card">
+                <h3>Meus Pedidos</h3>
+                <div id="myOrders">
+                    <div class="account-orders-empty">
+                        <p>Nenhum pedido encontrado.</p>
+                        <a href="../index.html" class="btn btn-primary" style="text-decoration:none;">Ver Produtos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"><span class="toast-message" id="toastMessage"></span></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script>
+        const statusLabels = {
+            pending: 'Pendente',
+            paid: 'Pago',
+            shipped: 'Enviado',
+            delivered: 'Entregue',
+            cancelled: 'Cancelado'
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await _supabase.auth.getSession();
+
+            if (!session) {
+                window.location.href = 'login-cliente.html';
+                return;
+            }
+
+            const user = session.user;
+            const meta = user.user_metadata || {};
+
+            document.getElementById('profileInfo').innerHTML = `
+                <div class="account-info-item">
+                    <label>Nome</label>
+                    <span>${meta.full_name || meta.name || '—'}</span>
+                </div>
+                <div class="account-info-item">
+                    <label>E-mail</label>
+                    <span>${user.email}</span>
+                </div>
+                <div class="account-info-item">
+                    <label>Telefone</label>
+                    <span>${meta.phone || '—'}</span>
+                </div>
+                <div class="account-info-item">
+                    <label>CPF</label>
+                    <span>${meta.cpf || 'Não informado'}</span>
+                </div>
+            `;
+
+            try {
+                const { data: orders } = await _supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('customer_email', user.email)
+                    .order('created_at', { ascending: false });
+
+                if (orders && orders.length > 0) {
+                    document.getElementById('myOrders').innerHTML = orders.map(order => `
+                        <div class="order-item">
+                            <div class="order-item-top">
+                                <strong>Pedido #${order.id.toString().slice(-6).toUpperCase()}</strong>
+                                <span class="order-status ${order.status}">${statusLabels[order.status] || order.status}</span>
+                            </div>
+                            <div class="order-item-bottom">
+                                <span>${(order.items || []).map(i => i.name).join(', ')}</span>
+                                <span>R$ ${parseFloat(order.total).toFixed(2).replace('.', ',')}</span>
+                            </div>
+                            <div class="order-item-bottom" style="margin-top:4px;">
+                                <span>${new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.warn('Orders fetch error:', err);
+            }
+        });
+
+        async function customerLogout() {
+            await _supabase.auth.signOut();
+            window.location.href = '../index.html';
+        }
+    </script>
+</body>
+</html>
